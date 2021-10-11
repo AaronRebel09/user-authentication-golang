@@ -1,1 +1,1 @@
-# user-athentication-golang
+# user-authentication-golang
