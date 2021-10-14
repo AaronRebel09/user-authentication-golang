@@ -3,15 +3,17 @@ package helpers
 import (
 	"context"
 	"fmt"
+	"log"
+	"os"
+	"strings"
+	"time"
+
 	"github.com/AaronRebel09/user-authentication-golang/database"
 	"github.com/dgrijalva/jwt-go"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"log"
-	"os"
-	"time"
 )
 
 // SignedDetails
@@ -52,7 +54,11 @@ func GenerateAllTokens(email string, firstName string, lastName string, uid stri
 }
 
 // ValidateToken validates the jwt token
-func ValidateToken(signedToken string) (claims *SignedDetails, msg string)  {
+func ValidateToken(signedToken string) (claims *SignedDetails, msg string) {
+
+	//Quitamos el prefijo Bearer del token
+	signedToken = strings.ReplaceAll(signedToken, "Bearer ", "")
+
 	token, err := jwt.ParseWithClaims(
 		signedToken,
 		&SignedDetails{},
@@ -61,7 +67,7 @@ func ValidateToken(signedToken string) (claims *SignedDetails, msg string)  {
 		},
 	)
 	if err != nil {
-		msg =err.Error()
+		msg = err.Error()
 		return
 	}
 	claims, ok := token.Claims.(*SignedDetails)
@@ -84,8 +90,8 @@ func UpdateAllTokens(signedToken string, signedRefreshToken string, userId strin
 	var updateObj primitive.D
 	updateObj = append(updateObj, bson.E{"token", signedToken})
 	updateObj = append(updateObj, bson.E{"refresh_token", signedRefreshToken})
-	Updated_at, _:= time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
-	updateObj = append(updateObj, bson.E{"updated_at",Updated_at})
+	Updated_at, _ := time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
+	updateObj = append(updateObj, bson.E{"updated_at", Updated_at})
 	upsert := true
 	filter := bson.M{"user_id": userId}
 	opt := options.UpdateOptions{
@@ -95,10 +101,10 @@ func UpdateAllTokens(signedToken string, signedRefreshToken string, userId strin
 		ctx,
 		filter,
 		bson.D{
-			{"$set",updateObj},
+			{"$set", updateObj},
 		},
 		&opt,
-		)
+	)
 	defer cancel()
 	if err != nil {
 		log.Panic(err)

@@ -2,16 +2,17 @@ package middleware
 
 import (
 	"fmt"
+	"net/http"
+
 	helper "github.com/AaronRebel09/user-authentication-golang/helpers"
 	"github.com/gin-gonic/gin"
-	"net/http"
 )
 
 // Auth validates token and authorizes users
 func Authentication() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		clientToken := c.Request.Header.Get("token")
-		if clientToken =="" {
+		clientToken := c.Request.Header.Get("Authorization")
+		if clientToken == "" {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("No Authorization header provided")})
 			c.Abort()
 			return
