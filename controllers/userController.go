@@ -103,6 +103,28 @@ func SimpleEndpoint() gin.HandlerFunc {
 	}
 }
 
+func UploadImages() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		err := c.Request.ParseMultipartForm(32 << 20)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		//Access the name key - Third Approach
+		fmt.Println(c.Request.MultipartForm.Value["file"])
+
+		for _, h := range c.Request.MultipartForm.File["file"] {
+			fmt.Println("Archivo: ", h.Filename)
+			fmt.Println("Peso: ", h.Size)
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"message": "Ok",
+		})
+	}
+}
+
 // Login is the api used to get a single user
 func Login() gin.HandlerFunc {
 	return func(c *gin.Context) {
