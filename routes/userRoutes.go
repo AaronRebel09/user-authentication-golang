@@ -12,4 +12,5 @@ func UserRoutes(incomingRoutes *gin.Engine) {
 	incomingRoutes.POST("/users/signin", controller.Login())
 	//Se agrega middleware Authntication solo a este endpoint
 	incomingRoutes.GET("/users/info", middleware.Authentication(), controller.SimpleEndpoint())
+	incomingRoutes.POST("/users/upload", controller.UploadImages())
 }
